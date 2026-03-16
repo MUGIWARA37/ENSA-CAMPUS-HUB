@@ -295,6 +295,21 @@ $event_analytics = $event_stats->fetchAll();
         </div>
     </div>
 
+    <footer class="footer">
+            <p>Designed & Developed by <span>MUGIWARA37</span></p>
+            <div class="footer-links">
+                <a href="https://github.com/MUGIWARA37" target="_blank">
+                    <i class='bx bxl-github'></i> GitHub
+                </a>
+                <a href="https://www.linkedin.com/in/rida-hlou-581b4a36a/" target="_blank">
+                    <i class='bx bxl-linkedin'></i> LinkedIn
+                </a>
+                <a href="mailto:hloureda@gmail.com">
+                    <i class='bx bx-envelope'></i> hloureda@gmail.com
+                </a>
+            </div>
+    </footer>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script>
         // ─── Member search & sort ─────────────────────

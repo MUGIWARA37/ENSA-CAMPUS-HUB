@@ -315,7 +315,7 @@ if (!empty($_GET['search_cne'])) {
                 </div>
             </div>
             
-            <footer class="footer">
+        <footer class="footer">
             <p>Designed & Developed by <span>MUGIWARA37</span></p>
             <div class="footer-links">
                 <a href="https://github.com/MUGIWARA37" target="_blank">
