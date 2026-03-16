@@ -54,7 +54,7 @@ try {
                 $pdo->prepare("INSERT INTO ETUDIANT_CLUB (etudiant_id, club_id, status, registration_date) VALUES (?, ?, 'accepted', NOW())")
                     ->execute([$_POST['club_admin_cne'], $new_club_id]);
             }
-            
+
             $pdo->commit();
             $message = "Club created and Admin assigned!";
         }
@@ -304,17 +304,32 @@ if (!empty($_GET['search_cne'])) {
                 <form method="GET"><select name="view_event_id" onchange="saveScroll(); this.form.submit()"><option value="">Select Event</option><?php
                     $ev_s = $pdo->query("SELECT event_id, event_name FROM EVENEMENT WHERE status = 'approved'");
                     foreach($ev_s->fetchAll() as $e) echo "<option value='{$e['event_id']}' ".($view_event_id==$e['event_id']?'selected':'').">{$e['event_name']}</option>";
-                ?></select></form>
+                    ?></select></form>
                 <?php if($event_participants): ?><table><?php foreach($event_participants as $p) echo "<tr><td>{$p['fist_name']} {$p['last_name']}</td></tr>"; ?></table><?php endif; ?>
+                </div>
+                <div class="card">
+                    <h3>Club Membership <?php if($view_club_id) echo "<span class='badge-count'>".count($club_members)."</span>"; ?></h3>
+                    <form method="GET"><select name="view_club_id" onchange="saveScroll(); this.form.submit()"><option value="">Select Club</option><?php foreach($all_clubs as $c) echo "<option value='{$c['club_id']}' ".($view_club_id==$c['club_id']?'selected':'').">{$c['club_name']}</option>"; ?></select></form>
+                    <?php if($club_members): ?><table><?php foreach($club_members as $m) echo "<tr><td>{$m['fist_name']} {$m['last_name']}</td></tr>"; ?></table><?php endif; ?>
+                    </div>
+                </div>
             </div>
-            <div class="card">
-                <h3>Club Membership <?php if($view_club_id) echo "<span class='badge-count'>".count($club_members)."</span>"; ?></h3>
-                <form method="GET"><select name="view_club_id" onchange="saveScroll(); this.form.submit()"><option value="">Select Club</option><?php foreach($all_clubs as $c) echo "<option value='{$c['club_id']}' ".($view_club_id==$c['club_id']?'selected':'').">{$c['club_name']}</option>"; ?></select></form>
-                <?php if($club_members): ?><table><?php foreach($club_members as $m) echo "<tr><td>{$m['fist_name']} {$m['last_name']}</td></tr>"; ?></table><?php endif; ?>
-            </div>
-        </div>
-    </div>
-
+            
+            <footer class="footer">
+                <p>Designed & Developed by <span>MUGIWARA37</span></p>
+                <div class="footer-links">
+                    <a href="https://github.com/MUGIWARA37" target="_blank">
+                        <i class='bx bxl-github'></i> GitHub
+                    </a>
+                    <a href="https://www.linkedin.com/in/rida-hlou-581b4a36a/" target="_blank">
+                        <i class='bx bxl-linkedin'></i> LinkedIn
+                    </a>
+                    <a href="mailto:hloureda@gmail.com">
+                        <i class='bx bx-envelope'></i> hloureda@gmail.com
+                    </a>
+                </div>
+            </footer>
+            
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script>
         function saveScroll() { sessionStorage.setItem("admY", window.scrollY); }
@@ -416,5 +431,6 @@ if (!empty($_GET['search_cne'])) {
         setActive('club',  clubType);
         setActive('event', eventType);
     </script>
+
 </body>
 </html>

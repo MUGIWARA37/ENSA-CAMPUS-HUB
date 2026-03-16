@@ -242,10 +242,25 @@ try {
                         </form>
                     </div>
                 </div>
-            <?php endforeach; ?>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
         </div>
-        <?php endif; ?>
-    </div>
+        
+        <footer class="footer">
+            <p>Designed & Developed by <span>MUGIWARA37</span></p>
+            <div class="footer-links">
+                <a href="https://github.com/MUGIWARA37" target="_blank">
+                    <i class='bx bxl-github'></i> GitHub
+                </a>
+                <a href="https://www.linkedin.com/in/rida-hlou-581b4a36a/" target="_blank">
+                    <i class='bx bxl-linkedin'></i> LinkedIn
+                </a>
+                <a href="mailto:hloureda@gmail.com">
+                    <i class='bx bx-envelope'></i> hloureda@gmail.com
+                </a>
+            </div>
+        </footer>
 
     <script>
         function saveScroll() { sessionStorage.setItem("homeY", window.scrollY); }
@@ -255,5 +270,6 @@ try {
         };
         document.querySelectorAll('form').forEach(f => f.onsubmit = saveScroll);
     </script>
+
 </body>
 </html>
