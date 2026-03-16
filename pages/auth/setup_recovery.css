@@ -1,0 +1,95 @@
+body {
+    background-color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+
+.setup-container {
+    width: 100%;
+    max-width: 480px;
+    padding: 2.5rem;
+    background: var(--white);
+    border-radius: 2rem;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 10px 30px;
+    z-index: 10;
+}
+
+h2 {
+    color: #000000;
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.instruction {
+    color: #000000;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 500;
+}
+
+.question-label {
+    display: block;
+    text-align: left;
+    font-weight: 700;
+    color: #000000;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    margin-top: 15px;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.input-group i {
+    position: absolute;
+    top: 50%;
+    left: 1rem;
+    transform: translateY(-50%);
+    color: var(--primary-color);
+    z-index: 2;
+}
+
+.input-group select,
+.input-group input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    background-color: #fcfcfc;
+    border: 2px solid #d1d1d1;
+    border-radius: 0.8rem;
+    color: #000000 !important;
+    font-size: 1rem;
+    font-weight: 600;
+    outline: none;
+}
+
+.input-group select:focus,
+.input-group input:focus {
+    border-color: var(--primary-color);
+}
+
+.btn-finalize {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 1rem;
+    width: 100%;
+    border-radius: 0.8rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: 0.3s;
+}
+
+.btn-finalize:hover {
+    background-color: var(--secondary-color);
+    box-shadow: 0 0 15px var(--primary-color);
+}

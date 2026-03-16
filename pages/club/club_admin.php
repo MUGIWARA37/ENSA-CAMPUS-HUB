@@ -1,11 +1,11 @@
 <?php
 session_start();
-require_once 'db.php';
+require_once '../../includes/db.php';
 
 // 1. ACCESS CONTROL: Strictly for Club Admins ('C')
 $user_priv = $_SESSION['privileges'] ?? $_SESSION['privilege'] ?? '';
 if ($user_priv !== 'C') {
-    header("Location: home.php");
+    header("Location: ../general/home.php");
     exit();
 }
 
@@ -16,7 +16,7 @@ $message = ""; $error_message = "";
 $stmtClub = $pdo->prepare("SELECT club_id, club_name FROM CLUB WHERE id_admin_etudiant = ?");
 $stmtClub->execute([$user_id]);
 $my_club = $stmtClub->fetch();
-if (!$my_club) { header("Location: home.php?error=no_club_leader"); exit(); }
+if (!$my_club) { header("Location: ../general/home.php?error=no_club_leader"); exit(); }
 $club_id = $my_club['club_id'];
 
 // 3. LOGIC SERVICES
@@ -47,16 +47,14 @@ if (isset($_POST['manage_event_join'])) {
     $message = "Event participation updated!";
 }
 
-// UPDATED: Event Request Logic with Duplicate Check
 if (isset($_POST['request_event'])) {
-    $e_name = trim($_POST['e_name']);
-    $e_fees = $_POST['e_fees'];
+    $e_name   = trim($_POST['e_name']);
+    $e_fees   = $_POST['e_fees'];
     $e_budget = $_POST['e_budget'];
 
-    // CHECK FOR DUPLICATE NAME
     $stmtCheck = $pdo->prepare("SELECT event_id FROM EVENEMENT WHERE event_name = ?");
     $stmtCheck->execute([$e_name]);
-    
+
     if ($stmtCheck->fetch()) {
         $error_message = "Rejected: An event named '" . htmlspecialchars($e_name) . "' already exists in the system.";
     } elseif ($e_fees < 0 || $e_budget < 0) {
@@ -75,7 +73,6 @@ if (isset($_POST['request_event'])) {
                 $club_id
             ]);
             $new_id = $pdo->lastInsertId();
-            // Club admin is automatically accepted into their own event
             $pdo->prepare("INSERT INTO EVENEMENT_ETUDIANT (etudiant_id, event_id, status, registration_date) VALUES (?, ?, 'accepted', NOW())")->execute([$user_id, $new_id]);
             $message = "Event request submitted successfully!";
         } catch (Exception $e) { $error_message = "Database Error: " . $e->getMessage(); }
@@ -91,8 +88,8 @@ if (isset($_POST['transfer_leadership'])) {
         $pdo->prepare("UPDATE ETUDIANT SET privilege = 'S' WHERE etudiant_id = ?")->execute([$user_id]);
         $pdo->commit();
         $_SESSION['privileges'] = 'S';
-        $_SESSION['privilege'] = 'S';
-        header("Location: home.php?msg=leadership_transferred");
+        $_SESSION['privilege']  = 'S';
+        header("Location: ../general/home.php?msg=leadership_transferred");
         exit();
     } catch (Exception $e) {
         $pdo->rollBack();
@@ -121,52 +118,20 @@ $rank_stmt = $pdo->prepare("
 $rank_stmt->execute([$club_id, $club_id]);
 $rankings = $rank_stmt->fetchAll();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Club Admin | Dashboard</title>
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
-        :root { --primary: #4EA685; --secondary: #57B894; --danger: #ff4d4d; --glass: rgba(255, 255, 255, 0.08); --border: rgba(255, 255, 255, 0.15); }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: linear-gradient(rgba(0,0,0,0.95), rgba(0,0,0,0.95)), url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=2070'); background-size: cover; background-attachment: fixed; color: #fff; min-height: 100vh; padding-bottom: 50px; }
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 8%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 1000; }
-        .nav-links { display: flex; align-items: center; gap: 20px; }
-        .nav-btn { text-decoration: none; color: #fff; padding: 10px 18px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; transition: 0.3s; border: 1px solid transparent; }
-        .nav-btn:hover { color: var(--secondary); background: rgba(78, 166, 133, 0.1); border-color: var(--secondary); box-shadow: 0 0 15px var(--primary); }
-        .logout-btn:hover { border-color: var(--danger) !important; color: var(--danger) !important; box-shadow: 0 0 15px var(--danger) !important; background: rgba(255, 77, 77, 0.1) !important; }
-        .container { max-width: 1250px; margin: 3rem auto; padding: 0 20px; }
-        .admin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; }
-        .row-full { grid-column: span 2; }
-        .card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 28px; padding: 30px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
-        h3 { color: var(--secondary); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; font-size: 1.3rem; }
-        input, select { width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 14px; color: #fff; outline: none; margin-bottom: 15px; }
-        .btn { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 16px; cursor: pointer; font-weight: 700; width: 100%; transition: 0.4s; }
-        .btn:hover { background: var(--secondary); box-shadow: 0 0 20px var(--primary); transform: translateY(-2px); }
-        .btn-danger-glow { background: var(--danger); color: white; border: none; padding: 14px; border-radius: 16px; cursor: pointer; font-weight: 700; width: 100%; transition: 0.4s; }
-        .btn-danger-glow:hover { box-shadow: 0 0 20px var(--danger); transform: translateY(-2px); }
-        table { width: 100%; border-collapse: collapse; }
-        td { padding: 15px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
-        .btn-action { background: none; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; padding: 0 5px; font-size: 0.75rem; }
-        .approve { color: var(--primary); } .deny { color: var(--danger); }
-        #resultBox { margin-top: 20px; background: rgba(0,0,0,0.3); padding: 20px; border-radius: 20px; border: 1px dashed var(--secondary); display: none; }
-        .res-item { margin-bottom: 8px; font-size: 0.9rem; }
-        .res-label { color: var(--secondary); font-weight: 600; margin-right: 5px; }
-        .alert { padding: 15px; border-radius: 15px; margin-bottom: 20px; font-weight: 600; border: 1px solid; }
-        .alert-success { background: rgba(78, 166, 133, 0.2); color: var(--secondary); border-color: var(--primary); }
-        .alert-error { background: rgba(255, 77, 77, 0.2); color: var(--danger); border-color: var(--danger); }
-    </style>
+    <link rel="stylesheet" href="club_admin.css">
 </head>
 <body>
-
     <nav class="navbar">
         <div style="font-weight: 800; color: var(--secondary); font-size: 1.5rem;"><i class='bx bxs-shield-crown'></i> CLUB CONSOLE</div>
         <div class="nav-links">
-            <a href="home.php" class="nav-btn">Dashboard</a>
-            <a href="logout.php" class="nav-btn logout-btn" style="color:var(--danger);">Logout</a>
+            <a href="../general/home.php" class="nav-btn">Dashboard</a>
+            <a href="../auth/logout.php" class="nav-btn logout-btn" style="color:var(--danger);">Logout</a>
         </div>
     </nav>
 
@@ -188,10 +153,8 @@ $rankings = $rank_stmt->fetchAll();
                     <input type="text" name="e_name" placeholder="Event Name" required>
                     <input type="text" name="e_type" placeholder="Category" required>
                     <input type="text" name="e_place" placeholder="Location" required>
-
                     <input type="number" step="0.01" min="0" name="e_budget" placeholder="Capital Needed (DH)" required>
                     <input type="number" min="0" name="e_fees" placeholder="Fee Per Person (DH)" required>
-
                     <input type="datetime-local" name="e_start" required title="Start Date">
                     <input type="datetime-local" name="e_end" required title="End Date">
                     <button type="submit" name="request_event" class="btn">SUBMIT REQUEST</button>
@@ -225,7 +188,8 @@ $rankings = $rank_stmt->fetchAll();
                         <td><strong><?php echo htmlspecialchars($pe['fist_name']); ?></strong><br><small><?php echo htmlspecialchars($pe['event_name']); ?></small></td>
                         <td style="text-align:right;">
                             <form method="POST">
-                                <input type="hidden" name="student_id" value="<?php echo $pe['etudiant_id']; ?>"><input type="hidden" name="event_id" value="<?php echo $pe['event_id']; ?>">
+                                <input type="hidden" name="student_id" value="<?php echo $pe['etudiant_id']; ?>">
+                                <input type="hidden" name="event_id" value="<?php echo $pe['event_id']; ?>">
                                 <button type="submit" name="manage_event_join" onclick="this.form.act2.value='approve'" class="btn-action approve">ACCEPT</button>
                                 <button type="submit" name="manage_event_join" onclick="this.form.act2.value='deny'" class="btn-action deny">DENY</button>
                                 <input type="hidden" name="action" id="act2">
@@ -249,14 +213,23 @@ $rankings = $rank_stmt->fetchAll();
                     <thead><tr style="color:var(--secondary); font-weight:800;"><td>Name</td><td>Classe</td><td>Joined On</td><td>Events</td><td style="text-align:right;">Action</td></tr></thead>
                     <tbody id="memberBody">
                         <?php foreach($rankings as $r): ?>
-                        <tr class="member-row" data-name="<?php echo strtolower($r['fist_name']." ".$r['last_name']); ?>" data-id="<?php echo $r['etudiant_id']; ?>" data-date="<?php echo $r['registration_date'] ?? ''; ?>" data-events="<?php echo $r['count']; ?>" data-classe="<?php echo $r['classe']; ?>" data-attended="<?php echo htmlspecialchars($r['attended_list'] ?: 'None'); ?>">
+                        <tr class="member-row"
+                            data-name="<?php echo strtolower($r['fist_name']." ".$r['last_name']); ?>"
+                            data-id="<?php echo $r['etudiant_id']; ?>"
+                            data-date="<?php echo $r['registration_date'] ?? ''; ?>"
+                            data-events="<?php echo $r['count']; ?>"
+                            data-classe="<?php echo $r['classe']; ?>"
+                            data-attended="<?php echo htmlspecialchars($r['attended_list'] ?: 'None'); ?>">
                             <td><?php echo $r['fist_name']." ".$r['last_name']; ?></td>
                             <td><?php echo $r['classe']; ?></td>
                             <td><?php echo $r['registration_date'] ? date('M d, Y', strtotime($r['registration_date'])) : 'N/A'; ?></td>
                             <td><?php echo $r['count']; ?></td>
                             <td style="text-align:right;">
                                 <?php if($r['etudiant_id'] !== $user_id): ?>
-                                <form method="POST" onsubmit="return confirm('Kick this member?')"><input type="hidden" name="student_id" value="<?php echo $r['etudiant_id']; ?>"><button type="submit" name="remove_member" class="btn-action deny">Kick</button></form>
+                                <form method="POST" onsubmit="return confirm('Kick this member?')">
+                                    <input type="hidden" name="student_id" value="<?php echo $r['etudiant_id']; ?>">
+                                    <button type="submit" name="remove_member" class="btn-action deny">Kick</button>
+                                </form>
                                 <?php endif; ?>
                             </td>
                         </tr>
