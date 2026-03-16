@@ -45,6 +45,16 @@ try {
             $stmt = $pdo->prepare("INSERT INTO CLUB (club_name, descriptoin, incs_fees, id_admin_etudiant) VALUES (?, ?, ?, ?)");
             $stmt->execute([$club_name, $_POST['description'], $_POST['fees'], $_POST['club_admin_cne']]);
             $pdo->prepare("UPDATE ETUDIANT SET privilege = 'C' WHERE etudiant_id = ?")->execute([$_POST['club_admin_cne']]);
+
+            // Auto-join the assigned leader as accepted member if not already in the club
+            $stmt_check_member = $pdo->prepare("SELECT 1 FROM ETUDIANT_CLUB WHERE etudiant_id = ? AND club_id = ?");
+            $stmt_check_member->execute([$_POST['club_admin_cne'], $pdo->lastInsertId()]);
+            if (!$stmt_check_member->fetch()) {
+                $new_club_id = $pdo->query("SELECT LAST_INSERT_ID()")->fetchColumn();
+                $pdo->prepare("INSERT INTO ETUDIANT_CLUB (etudiant_id, club_id, status, registration_date) VALUES (?, ?, 'accepted', NOW())")
+                    ->execute([$_POST['club_admin_cne'], $new_club_id]);
+            }
+            
             $pdo->commit();
             $message = "Club created and Admin assigned!";
         }
