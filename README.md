@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ENSA Campus Hub
 ### Club & Event Management Platform for ENSA Khouribga
 
@@ -67,8 +66,12 @@ This project develops the core skills required for **full-stack web development 
 │
 ├── index.php                        # Entry point (login & register)
 ├── index.html
-├── style.css                        # Global stylesheet
-├── script.js                        # Global scripts
+│
+├── assets/                          # Static files
+│   ├── css/
+│   │   └── style.css                # Global stylesheet
+│   └── js/
+│       └── script.js                # Global scripts
 │
 ├── admin/                           # Super admin panel
 │   ├── admin.php
@@ -101,13 +104,13 @@ This project develops the core skills required for **full-stack web development 
 
 ## Tech Stack
 
-| Layer    | Technology          |
-|----------|---------------------|
-| Frontend | HTML, CSS, JavaScript |
-| Backend  | PHP 8+              |
-| Database | MySQL (PDO)         |
-| Charts   | Chart.js 4.4        |
-| Icons    | Boxicons 2.1        |
+| Layer    | Technology             |
+|----------|------------------------|
+| Frontend | HTML, CSS, JavaScript  |
+| Backend  | PHP 8+                 |
+| Database | MySQL (PDO)            |
+| Charts   | Chart.js 4.4           |
+| Icons    | Boxicons 2.1           |
 | Fonts    | Google Fonts (Poppins) |
 
 ---
