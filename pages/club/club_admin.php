@@ -117,6 +117,19 @@ $rank_stmt = $pdo->prepare("
 ");
 $rank_stmt->execute([$club_id, $club_id]);
 $rankings = $rank_stmt->fetchAll();
+
+// 5. EVENT ANALYTICS
+$event_stats = $pdo->prepare("
+    SELECT ev.event_name, COUNT(ee.etudiant_id) as participants
+    FROM EVENEMENT ev
+    LEFT JOIN EVENEMENT_ETUDIANT ee ON ev.event_id = ee.event_id AND ee.status = 'accepted'
+    WHERE ev.club_id = ? AND ev.status = 'approved'
+    GROUP BY ev.event_id
+    ORDER BY participants DESC
+    LIMIT 8
+");
+$event_stats->execute([$club_id]);
+$event_analytics = $event_stats->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -238,6 +251,21 @@ $rankings = $rank_stmt->fetchAll();
                 </table>
             </div>
 
+            <!-- Event Analytics Dashboard -->
+            <?php if(!empty($event_analytics)): ?>
+            <div class="analytics-card row-full">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+                    <h3 style="margin-bottom:0;"><i class='bx bx-bar-chart-alt-2'></i> Event Participation Analytics</h3>
+                    <div class="chart-toggle">
+                        <button onclick="switchChart('bars')" id="btn-bars">Bars</button>
+                        <button onclick="switchChart('doughnut')" id="btn-doughnut">Doughnut</button>
+                        <button onclick="switchChart('line')" id="btn-line">Line</button>
+                    </div>
+                </div>
+                <div class="chart-area"><canvas id="eventChart"></canvas></div>
+            </div>
+            <?php endif; ?>
+
             <div class="card">
                 <h3><i class='bx bx-transfer'></i> Transfer Leadership</h3>
                 <form method="POST" onsubmit="return confirm('Make this person the new admin? You will stay in the club as a student.')">
@@ -267,7 +295,9 @@ $rankings = $rank_stmt->fetchAll();
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <script>
+        // ─── Member search & sort ─────────────────────
         function searchMember() {
             let input = document.getElementById("searchInput").value.toLowerCase();
             let resultBox = document.getElementById("resultBox");
@@ -304,6 +334,66 @@ $rankings = $rank_stmt->fetchAll();
             rows.forEach(row => body.appendChild(row));
         }
         window.onload = sortMembers;
+
+        // ─── Event Analytics Chart ────────────────────
+        <?php if(!empty($event_analytics)): ?>
+        const eventLabels = <?php echo json_encode(array_column($event_analytics, 'event_name')); ?>;
+        const eventData   = <?php echo json_encode(array_column($event_analytics, 'participants')); ?>;
+        const colors = ['#4EA685','#57B894','#f1c40f','#ff4d4d','#3498db','#9b59b6','#e67e22','#1abc9c'];
+
+        let chartType = localStorage.getItem('clubEventChartType') || 'bars';
+        let eventChart = null;
+
+        function buildDataset(type) {
+            if (type === 'doughnut') {
+                return { labels: eventLabels, datasets: [{ data: eventData, backgroundColor: colors, borderColor: 'rgba(0,0,0,0.3)', borderWidth: 2 }] };
+            } else if (type === 'line') {
+                return { labels: eventLabels, datasets: [{ label: 'Participants', data: eventData, borderColor: '#4EA685', backgroundColor: 'rgba(78,166,133,0.15)', pointBackgroundColor: colors, borderWidth: 3, pointRadius: 6, fill: true, tension: 0.4 }] };
+            } else {
+                return { labels: eventLabels, datasets: [{ label: 'Participants', data: eventData, backgroundColor: colors, borderColor: colors, borderWidth: 2, borderRadius: 8 }] };
+            }
+        }
+
+        function getOptions(type) {
+            const base = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: '#fff', font: { family: 'Poppins', size: 12 }, padding: 15 } },
+                    tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} participants` } }
+                }
+            };
+            if (type !== 'doughnut') {
+                base.scales = {
+                    x: { ticks: { color: '#aaa', font: { family: 'Poppins' } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { ticks: { color: '#aaa', font: { family: 'Poppins' } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                };
+            }
+            return base;
+        }
+
+        function setActive(type) {
+            ['bars','doughnut','line'].forEach(t => {
+                const btn = document.getElementById(`btn-${t}`);
+                if (btn) btn.classList.toggle('active', t === type);
+            });
+        }
+
+        function switchChart(type) {
+            if (eventChart) eventChart.destroy();
+            chartType = type;
+            localStorage.setItem('clubEventChartType', type);
+            const chartJsType = type === 'bars' ? 'bar' : type;
+            eventChart = new Chart(document.getElementById('eventChart'), {
+                type: chartJsType,
+                data: buildDataset(type),
+                options: getOptions(type)
+            });
+            setActive(type);
+        }
+
+        switchChart(chartType);
+        <?php endif; ?>
     </script>
 </body>
 </html>
