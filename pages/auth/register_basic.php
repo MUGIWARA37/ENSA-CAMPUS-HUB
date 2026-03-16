@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $stmt = $pdo->prepare(
-            "INSERT INTO ETUDIANT (etudiant_id, fist_name, last_name, email, classe, password, prevliges) 
+            "INSERT INTO ETUDIANT (etudiant_id, fist_name, last_name, email, classe, password, privilege) 
              VALUES (?, ?, ?, ?, ?, ?, 'S')"
         );
         $stmt->execute([$cne, $first_name, $last_name, $email, $classe, $hashed_password]);
