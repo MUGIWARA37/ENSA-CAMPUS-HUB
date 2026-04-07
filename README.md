@@ -102,6 +102,12 @@ This project develops the core skills required for **full-stack web development 
 
 ---
 
+# DataBase Structure
+
+![alt text](image.png)
+
+---
+
 ## Tech Stack
 
 | Layer    | Technology             |
