@@ -125,7 +125,9 @@ git clone https://github.com/MUGIWARA37/ENSA-CAMPUS-HUB.git
 cp -r ENSA-CAMPUS-HUB /var/www/html/
 
 # 3. Import the database
-mysql -u root -p < database/schema.sql
+mysql -u root -p < database/db_regen.sql
+mysql -u root -p < database/seed.sql
+
 
 # 4. Configure your DB connection
 nano /var/www/html/includes/db.php
