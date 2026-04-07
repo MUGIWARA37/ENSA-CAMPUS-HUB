@@ -66,8 +66,6 @@ This project develops the core skills required for **full-stack web development 
 │
 ├── index.php                        # Entry point (login & register)
 ├── index.html
-├── db_regen                         # SQL_DataBase generator 
-├── seed.sql                         # Test data generator
 │
 ├── assets/                          # Static files
 │   ├── css/
