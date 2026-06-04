@@ -10,6 +10,13 @@ USE club_management;
 -- Optional: avoid FK order issues while creating
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS PASSWORD_RESET;
+DROP TABLE IF EXISTS EVENEMENT_ETUDIANT;
+DROP TABLE IF EXISTS EVENEMENT;
+DROP TABLE IF EXISTS ETUDIANT_CLUB;
+DROP TABLE IF EXISTS CLUB;
+DROP TABLE IF EXISTS ETUDIANT;
+
 -- =========================
 -- TABLE: ETUDIANT
 -- =========================
@@ -33,11 +40,11 @@ CREATE TABLE CLUB (
     club_name        VARCHAR(255)  NOT NULL,
     descriptoin      TEXT,                     -- kept as in your screenshot
     incs_fees        DECIMAL(10,2) DEFAULT 0,  -- set precision
-    id_admin_etud    VARCHAR(50)   NOT NULL,
+    id_admin_etudiant    VARCHAR(50)   NOT NULL,
     PRIMARY KEY (club_id),
-    KEY idx_club_admin (id_admin_etud),
+    KEY idx_club_admin (id_admin_etudiant),
     CONSTRAINT fk_club_admin_etudiant
-        FOREIGN KEY (id_admin_etud)
+        FOREIGN KEY (id_admin_etudiant)
         REFERENCES ETUDIANT(etudiant_id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
@@ -49,7 +56,7 @@ CREATE TABLE CLUB (
 CREATE TABLE ETUDIANT_CLUB (
     etudiant_id       VARCHAR(50) NOT NULL,
     club_id           INT         NOT NULL,
-    status            ENUM('PENDING','APPROVED','REJECTED','ACTIVE','INACTIVE','BANNED','LEFT','EXPELLED') DEFAULT 'PENDING',
+    status            ENUM('pending','accepted','rejected','ACTIVE','INACTIVE','BANNED','LEFT','EXPELLED') DEFAULT 'pending',
     registration_date DATETIME    DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (etudiant_id, club_id),
     KEY idx_ec_club (club_id),
@@ -78,7 +85,7 @@ CREATE TABLE EVENEMENT (
     participation_fees  DECIMAL(10,2) DEFAULT 0,
     event_budget        DECIMAL(12,2) DEFAULT 0,
     club_id             INT           NOT NULL,
-    status              ENUM('PLANNED','OPEN','CLOSED','CANCELLED','POSTPONED','DONE','DRAFT','ARCHIVED') DEFAULT 'DRAFT',
+    status              ENUM('pending','approved','PLANNED','OPEN','CLOSED','CANCELLED','POSTPONED','DONE','DRAFT','ARCHIVED') DEFAULT 'pending',
     PRIMARY KEY (event_id),
     KEY idx_event_club (club_id),
     CONSTRAINT fk_event_club
@@ -95,8 +102,9 @@ CREATE TABLE EVENEMENT (
 CREATE TABLE EVENEMENT_ETUDIANT (
     event_id       INT         NOT NULL,
     etudiant_id    VARCHAR(50) NOT NULL,
-    status         ENUM('REGISTERED','WAITING','CONFIRMED','ATTENDED','ABSENT','CANCELLED','REJECTED','REFUNDED') DEFAULT 'REGISTERED',
+    status         ENUM('pending','accepted','rejected','REGISTERED','WAITING','CONFIRMED','ATTENDED','ABSENT','CANCELLED','REFUNDED') DEFAULT 'pending',
     registered_at  DATETIME    DEFAULT CURRENT_TIMESTAMP,
+    student_rating INT         DEFAULT 0,
     PRIMARY KEY (event_id, etudiant_id),
     KEY idx_ee_etudiant (etudiant_id),
     CONSTRAINT fk_ee_event

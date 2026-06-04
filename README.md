@@ -134,6 +134,11 @@ cp -r ENSA-CAMPUS-HUB /var/www/html/
 mysql -u root -p < database/db_regen.sql
 mysql -u root -p < database/seed.sql
 
+# Seeded test accounts use password: Test1234!
+
+# 3.b (Alternative) Start MySQL with Docker Compose (creates + seeds DB)
+docker compose up -d --build
+
 
 # 4. Configure your DB connection
 nano /var/www/html/includes/db.php

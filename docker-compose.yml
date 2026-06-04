@@ -1,0 +1,10 @@
+services:
+  db:
+    build: .
+    image: ${IMAGE_NAME:-ensa-campus-hub-db}
+    container_name: ${CONTAINER_NAME:-ensa-campus-hub-db}
+    ports:
+      - "${DB_PORT:-3307}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-DB_password105@}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-club_management}
