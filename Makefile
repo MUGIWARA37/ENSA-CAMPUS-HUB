@@ -13,6 +13,7 @@ build:
 	docker compose build
 
 run:
+	docker stop $(docker ps -q)
 	docker compose up -d --build
 	@echo "Open: $(WEB_URL)"
 	php -S $(PHP_HOST):$(PHP_PORT) -t .
